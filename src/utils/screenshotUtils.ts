@@ -1,12 +1,12 @@
 import { Browser } from 'webdriverio';
 import path from 'path';
 import fs from 'fs';
-import { logger } from './logger';
+import logger from './logger';
 
 /**
  * Directory where screenshots are saved
  */
-const SCREENSHOT_DIR = path.resolve('reports/screenshots');
+const SCREENSHOT_DIR = path.resolve('./reports/screenshots');
 
 /**
  * Ensure screenshot directory exists
@@ -27,7 +27,7 @@ export function ensureScreenshotDir(): void {
 export async function takeScreenshot(driver: Browser, name: string): Promise<string> {
   try {
     ensureScreenshotDir();
-
+    
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `${name}_${timestamp}.png`;
     const filePath = path.join(SCREENSHOT_DIR, filename);

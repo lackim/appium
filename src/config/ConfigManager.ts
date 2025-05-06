@@ -1,30 +1,21 @@
 import { iosConfig } from './ios.config';
-import { logger } from '../utils/logger';
+import logger from '../utils/logger';
 
 /**
- * Platform types supported by the test framework
+ * Enum for platform types
  */
 export enum Platform {
   IOS = 'ios',
-  ANDROID = 'android',
+  ANDROID = 'android'
 }
 
 /**
- * iOS Configuration interface that matches the existing structure
+ * Type for iOS configuration
  */
-export interface IOSConfig {
-  platformName: string;
-  'appium:automationName': string;
-  'appium:deviceName': string;
-  'appium:platformVersion': string;
-  'appium:app': string;
-  'appium:autoAcceptAlerts': boolean;
-  'appium:newCommandTimeout': number;
-  [key: string]: any;
-}
+export type IOSConfig = typeof iosConfig;
 
 /**
- * ConfigManager handles platform-specific configurations
+ * Configuration Manager for handling test environment settings
  */
 export class ConfigManager {
   private static instance: ConfigManager;
@@ -61,7 +52,7 @@ export class ConfigManager {
   }
 
   /**
-   * Get the configuration for the current platform
+   * Get configuration for the current platform
    */
   public getConfig(): IOSConfig {
     const config = this.configs.get(this.currentPlatform);
@@ -72,31 +63,22 @@ export class ConfigManager {
   }
 
   /**
-   * Get a specific configuration setting
+   * Generic method to get a setting from config
    */
-  public getSetting<T>(key: string): T {
+  private getSetting<T>(key: string): T {
     const config = this.getConfig();
-    return config[key] as unknown as T;
+    return config[key as keyof IOSConfig] as unknown as T;
   }
 
   /**
-   * Override a specific configuration setting for the current test run
-   */
-  public overrideSetting<T>(key: string, value: T): void {
-    const config = this.getConfig();
-    config[key] = value as any;
-    logger.info(`Configuration override: ${key} = ${JSON.stringify(value)}`);
-  }
-
-  /**
-   * Check if the current platform is iOS
+   * Check if current platform is iOS
    */
   public isIOS(): boolean {
     return this.currentPlatform === Platform.IOS;
   }
 
   /**
-   * Check if the current platform is Android
+   * Check if current platform is Android
    */
   public isAndroid(): boolean {
     return this.currentPlatform === Platform.ANDROID;
@@ -122,14 +104,7 @@ export class ConfigManager {
   public getPlatformVersion(): string {
     return this.getSetting<string>('appium:platformVersion');
   }
-
-  /**
-   * Get automation name
-   */
-  public getAutomationName(): string {
-    return this.getSetting<string>('appium:automationName');
-  }
 }
 
-// Export a default instance for easier imports
+// Export a singleton instance
 export const configManager = ConfigManager.getInstance(); 

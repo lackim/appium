@@ -1,10 +1,12 @@
 // This runs once after all tests are complete
-import { logger } from './logger';
+import * as fs from 'fs';
+import * as path from 'path';
+import logger from './logger';
 
 export default async function globalTeardown(): Promise<void> {
-  logger.info('Global teardown - test suite complete');
+  logger.info('Global teardown - cleaning up after tests');
   
-  // Any cleanup code needed after all tests finish running
+  // Add any cleanup logic here
   
-  // Close any open connections, etc.
+  logger.info('Test suite completed');
 } 

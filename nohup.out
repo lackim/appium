@@ -1,0 +1,16 @@
+[38;5;112m[Appium][0m Welcome to Appium v2.18.0 (REV 9b77a16af6c30960105ca53f0df0875ef133233a)
+[38;5;112m[Appium][0m Non-default server args:
+[38;5;112m[Appium][0m { relaxedSecurityEnabled: [33mtrue[39m }
+[38;5;112m[Appium][0m The autodetected Appium home path: /Users/lackim/Documents/GitHub/appium
+[38;5;112m[Appium][0m Attempting to load driver xcuitest...
+[38;5;112m[Appium][0m Requiring driver at /Users/lackim/Documents/GitHub/appium/node_modules/appium-xcuitest-driver/build/index.js
+[38;5;112m[Appium][0m XCUITestDriver has been successfully loaded in 0.436s
+[38;5;86m[HTTP][0m Could not start REST http interface listener. The requested port may already be in use. Please make sure there is no other instance of this server running already.
+[38;5;112m[Appium][0m Could not configure Appium server. It's possible that a driver or plugin tried to update the server and failed. Original error: listen EADDRINUSE: address already in use 0.0.0.0:4723
+[38;5;112m[Appium][0m Error: listen EADDRINUSE: address already in use 0.0.0.0:4723
+    at Server.setupListenHandle [as _listen2] (node:net:1937:16)
+    at listenInCluster (node:net:1994:12)
+    at node:net:2203:7
+    at processTicksAndRejections (node:internal/process/task_queues:90:21)
+info WDA Opening '/Users/lackim/Documents/GitHub/appium/node_modules/appium-xcuitest-driver/node_modules/appium-webdriveragent/WebDriverAgent.xcodeproj'
+✔ [32mopen-wda successfully ran[39m
