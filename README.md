@@ -17,9 +17,11 @@ This project implements automated UI tests for an iOS mobile application using A
 ├── config/                   # iOS-specific configurations
 ├── src/
 │   ├── pages/                # Page Object Models
+│   ├── scripts/              # Utility scripts for setup and debugging
 │   ├── tests/                # Test cases
 │   ├── utils/                # Helper utilities
 │   └── types/                # TypeScript type definitions
+├── scripts/                  # Shell scripts for environment setup
 ├── reports/                  # Test reports (generated)
 └── README.md                 # Project documentation
 ```
@@ -113,69 +115,69 @@ This project implements:
 - Helper methods and framework-level action wrappers
 - Dynamic waits and optimized test execution 
 
-## Rozwiązywanie problemów z Appium Inspector dla iOS 18.4
+## Troubleshooting Appium Inspector for iOS 18.4
 
-Jeśli napotkasz błąd "The file 'project.xcworkspace' could not be unlocked", wykonaj poniższe kroki:
+If you encounter the error "The file 'project.xcworkspace' could not be unlocked", follow these steps:
 
-1. Zatrzymaj wszystkie procesy Appium:
+1. Stop all Appium processes:
 ```bash
 pkill -f appium
 ```
 
-2. Napraw uprawnienia do katalogu WebDriverAgent:
+2. Fix permissions for the WebDriverAgent directory:
 ```bash
 sudo chmod -R 777 node_modules/appium-xcuitest-driver/node_modules/appium-webdriveragent/
 ```
 
-3. Wyczyść dane Xcode:
+3. Clear Xcode data:
 ```bash
 rm -rf ~/Library/Developer/Xcode/DerivedData/WebDriverAgent-*
 ```
 
-4. Zbuduj WebDriverAgent ponownie:
+4. Rebuild WebDriverAgent:
 ```bash
 npx appium driver run xcuitest build-wda
 ```
 
-5. Uruchom Appium z flagą relaxed-security:
+5. Run Appium with relaxed-security flag:
 ```bash
 npx appium --relaxed-security
 ```
 
-6. W osobnym terminalu uruchom WebDriverAgent:
+6. In a separate terminal, start WebDriverAgent:
 ```bash
 npx appium driver run xcuitest open-wda -p 8100 --debug
 ```
 
-7. Zmodyfikuj ustawienia w pliku ios.config.ts:
+7. Modify settings in the ios.config.ts file:
 ```typescript
 export const iosConfig = {
   // ... existing settings
   'appium:webDriverAgentUrl': 'http://localhost:8100',
-  'appium:useNewWDA': false, // Nie restartuj WDA
-  'appium:usePrebuiltWDA': true // Użyj istniejącego WDA
+  'appium:useNewWDA': false, // Don't restart WDA
+  'appium:usePrebuiltWDA': true // Use existing WDA
 };
 ```
 
-8. Sprawdź czy WebDriverAgent działa:
+8. Check if WebDriverAgent is running:
 ```bash
 curl http://localhost:8100/status
 ```
 
-Jeśli nadal występują problemy, rozważ użycie starszej wersji iOS (np. 17.x) lub użyj rzeczywistego urządzenia iOS. 
+If problems persist, consider using an older iOS version (e.g., 17.x) or a physical iOS device.
 
-## Implementacja Page Objects bez działającego Appium Inspector
+## Implementing Page Objects without a working Appium Inspector
 
-Jeśli nie możesz uruchomić Appium Inspector dla iOS 18.4, nadal możesz zaimplementować abstrakcyjne Page Objects w następujący sposób:
+If you can't run Appium Inspector for iOS 18.4, you can still implement abstract Page Objects as follows:
 
-1. Utwórz bazowe klasy Page Objects z przybliżonymi selektorami na podstawie konwencji iOS:
+1. Create base Page Object classes with approximate selectors based on iOS conventions:
 
 ```typescript
 // src/pages/LoginPage.ts
 import { BasePage } from './BasePage';
 
 export class LoginPage extends BasePage {
-  // Używaj przewidywalnych selektorów iOS
+  // Use predictable iOS selectors
   private usernameField = '~username'; // Accessibility ID
   private passwordField = '~password'; // Accessibility ID 
   private loginButton = '~login-button'; // Accessibility ID
@@ -188,19 +190,19 @@ export class LoginPage extends BasePage {
 }
 ```
 
-2. Używaj uniwersalnych selektorów, które działają na różnych platformach:
-   - Accessibility ID (prefiks `~`) - najlepszy wybór
-   - XPath - używaj tylko gdy konieczne
-   - Predicate strings - dla złożonych warunków iOS
+2. Use universal selectors that work across platforms:
+   - Accessibility ID (prefix `~`) - best choice
+   - XPath - use only when necessary
+   - Predicate strings - for complex iOS conditions
 
-3. Implementuj abstraktyczne Page Objects z myślą o przyszłej refaktoryzacji:
+3. Implement abstract Page Objects with future refactoring in mind:
 
 ```typescript
 // src/pages/ProductsPage.ts
 import { BasePage } from './BasePage';
 
 export class ProductsPage extends BasePage {
-  // Zastępcze selektory - do późniejszej aktualizacji po dostępie do Inspectora
+  // Placeholder selectors - to be updated later when Inspector access is available
   private productsList = '~products-list';
   private productItem = (name: string) => `~${name}`;
   
@@ -211,11 +213,11 @@ export class ProductsPage extends BasePage {
 }
 ```
 
-4. Dodaj komentarze TODO w miejscach, które wymagają sprawdzenia rzeczywistych selektorów:
+4. Add TODO comments in places that require verification of actual selectors:
 
 ```typescript
-// TODO: Zweryfikować selektory po uruchomieniu Appium Inspector
+// TODO: Verify selectors after running Appium Inspector
 private checkoutButton = '~checkout';
 ```
 
-Ta strategia pozwoli Ci zaimplementować strukturę Page Objects, którą łatwo zaktualizujesz, gdy uda Ci się uruchomić Appium Inspector lub gdy będziesz miał dostęp do urządzenia z iOS 17.x. 
+This strategy allows you to implement a Page Object structure that you can easily update once you get Appium Inspector working or when you have access to a device with iOS 17.x. 
