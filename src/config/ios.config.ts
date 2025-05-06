@@ -1,6 +1,7 @@
 /**
  * iOS-specific configuration for Appium
  */
+// TypeScript knows about process.env in Node environment
 export const iosConfig = {
   platformName: 'iOS',
   'appium:automationName': 'XCUITest',
