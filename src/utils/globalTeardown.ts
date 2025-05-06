@@ -1,9 +1,10 @@
 // This runs once after all tests are complete
+import { logger } from './logger';
+
 export default async function globalTeardown(): Promise<void> {
-  console.log('Global teardown - test suite complete');
+  logger.info('Global teardown - test suite complete');
   
-  // Any cleanup operations needed after all tests finish
+  // Any cleanup code needed after all tests finish running
   
-  // Example: Log test completion time
-  console.log(`Tests completed at: ${new Date().toISOString()}`);
+  // Close any open connections, etc.
 } 
