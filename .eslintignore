@@ -1,0 +1,7 @@
+node_modules/
+dist/
+derived_data/
+coverage/
+reports/
+apps/
+jest.config.js 

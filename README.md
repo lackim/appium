@@ -16,9 +16,17 @@ This project implements automated UI tests for an iOS mobile application using A
 .
 ├── config/                   # iOS-specific configurations
 ├── src/
+│   ├── data/                 # Test data management
+│   │   ├── generators/       # Data generators
+│   │   ├── providers/        # Test data providers
+│   │   └── TestStateManager.ts # State management between test steps
 │   ├── pages/                # Page Object Models
 │   ├── scripts/              # Utility scripts for setup and debugging
 │   ├── tests/                # Test cases
+│   │   ├── ios/              # iOS-specific tests
+│   │   │   ├── login.test.ts # Authentication tests
+│   │   │   └── checkout-flow.test.ts # Checkout flow tests
+│   │   └── README.md         # Test structure documentation
 │   ├── utils/                # Helper utilities
 │   └── types/                # TypeScript type definitions
 ├── scripts/                  # Shell scripts for environment setup
@@ -221,3 +229,5 @@ private checkoutButton = '~checkout';
 ```
 
 This strategy allows you to implement a Page Object structure that you can easily update once you get Appium Inspector working or when you have access to a device with iOS 17.x. 
+
+> **Note on Test Migration**: We are currently migrating tests from the root-level `tests/` directory to `src/tests/`. All new tests should be created in the `src/tests/` directory following the organization described above. 

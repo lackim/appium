@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "cross-env PLATFORM=ios jest",
-    "test:ios": "cross-env PLATFORM=ios jest",
+    "test:ios": "cross-env PLATFORM=ios jest 'src/tests/ios'",
+    "test:checkout": "cross-env PLATFORM=ios jest 'src/tests/ios/checkout-flow.test.ts'",
+    "test:login": "cross-env PLATFORM=ios jest 'src/tests/ios/login.test.ts'",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write \"**/*.{ts,js,json,md}\"",
     "appium:start": "appium",

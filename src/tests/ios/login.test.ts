@@ -1,5 +1,5 @@
 import { remote } from 'webdriverio';
-import { LoginPage } from '../../src/pages/LoginPage';
+import { LoginPage } from '../../pages/LoginPage';
 
 describe('SauceLabs Mobile App - Login Tests', () => {
   let driver: WebdriverIO.Browser;
@@ -49,7 +49,8 @@ describe('SauceLabs Mobile App - Login Tests', () => {
 
   it('should show error message with invalid credentials', async () => {
     // Reset the app state before this test
-    await driver.reset();
+    await (driver as any).execute('mobile: terminateApp', { bundleId: 'com.saucelabs.demo.ios' });
+    await (driver as any).execute('mobile: launchApp', { bundleId: 'com.saucelabs.demo.ios' });
     
     // Attempt login with invalid credentials
     await loginPage.login('invalid_user', 'invalid_password');
@@ -65,7 +66,8 @@ describe('SauceLabs Mobile App - Login Tests', () => {
 
   it('should show specific error for locked out user', async () => {
     // Reset the app state before this test
-    await driver.reset();
+    await (driver as any).execute('mobile: terminateApp', { bundleId: 'com.saucelabs.demo.ios' });
+    await (driver as any).execute('mobile: launchApp', { bundleId: 'com.saucelabs.demo.ios' });
     
     // Login as locked out user
     await loginPage.loginAsLockedOutUser();

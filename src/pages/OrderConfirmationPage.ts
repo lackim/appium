@@ -1,4 +1,5 @@
 import { BasePage } from './BasePage';
+import { OrderConfirmation } from '../types';
 
 /**
  * Order Confirmation Page Object - represents the final order confirmation screen
@@ -66,6 +67,18 @@ export class OrderConfirmationPage extends BasePage {
   }
 
   /**
+   * Get complete order confirmation data
+   */
+  async getOrderConfirmation(): Promise<OrderConfirmation> {
+    return {
+      orderNumber: await this.getOrderNumber(),
+      orderDate: await this.getOrderDate(),
+      orderTotal: await this.getOrderTotal(),
+      deliveryDate: await this.getDeliveryDate()
+    };
+  }
+
+  /**
    * Continue shopping
    */
   async continueShopping(): Promise<void> {
@@ -86,5 +99,12 @@ export class OrderConfirmationPage extends BasePage {
     const confirmationMsg = await this.getConfirmationMessage();
     return confirmationMsg.toLowerCase().includes('success') ||
            confirmationMsg.toLowerCase().includes('thank you');
+  }
+  
+  /**
+   * Check if confirmation screen is displayed
+   */
+  async isConfirmationDisplayed(): Promise<boolean> {
+    return this.isElementDisplayed(this.selectors.confirmationMessage);
   }
 } 

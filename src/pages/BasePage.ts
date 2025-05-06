@@ -19,6 +19,13 @@ export class BasePage {
   }
 
   /**
+   * Wait for element to be displayed
+   */
+  async waitForElementToBeDisplayed(selector: string, timeout = 10000): Promise<void> {
+    await this.waitForElement(selector, timeout);
+  }
+
+  /**
    * Click on an element with wait and retry
    */
   async click(selector: string, retryConfig?: RetryConfig): Promise<void> {

@@ -1,4 +1,3 @@
-import { ElementArray } from '@wdio/protocols';
 import { BasePage } from './BasePage';
 
 /**
@@ -14,13 +13,44 @@ export class ProductsPage extends BasePage {
     cartBadge: '~cart-badge',
     cartIcon: '~cart-icon',
     filterButton: '~filter-button',
+    mainContent: '~products-screen'
   };
+
+  /**
+   * Wait for products page to load
+   */
+  async waitForPageToLoad(): Promise<void> {
+    await this.waitForElementToBeDisplayed(this.selectors.mainContent);
+  }
 
   /**
    * Get list of all products
    */
-  async getProducts(): Promise<ElementArray> {
+  async getProducts(): Promise<any> {
     return this.driver.$$(this.selectors.productItem);
+  }
+
+  /**
+   * Select a product by name
+   */
+  async selectProductByName(productName: string): Promise<void> {
+    const products = await this.getProducts();
+    for (const product of products) {
+      const titleElement = await product.$(this.selectors.productTitle);
+      const title = await titleElement.getText();
+      if (title === productName) {
+        await titleElement.click();
+        return;
+      }
+    }
+    throw new Error(`Product with name "${productName}" not found`);
+  }
+
+  /**
+   * Click add to cart button
+   */
+  async clickAddToCartButton(): Promise<void> {
+    await this.click(this.selectors.addToCartButton);
   }
 
   /**

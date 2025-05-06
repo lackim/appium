@@ -63,6 +63,18 @@ export class OrderSummaryPage extends BasePage {
   }
 
   /**
+   * Extract complete order summary data
+   */
+  async extractOrderSummary(): Promise<OrderSummary> {
+    return {
+      subtotal: await this.getSubtotalAmount(),
+      tax: await this.getTaxAmount(),
+      shipping: await this.getShippingAmount(),
+      total: await this.getTotalAmount()
+    };
+  }
+
+  /**
    * Place order
    */
   async placeOrder(): Promise<void> {
