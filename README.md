@@ -24,6 +24,7 @@ This project implements automated UI tests for an iOS mobile application using A
 │   ├── scripts/              # Utility scripts for setup and debugging
 │   ├── tests/                # Test cases
 │   │   └── ios/              # iOS-specific tests
+│   │       └── additional/   # Additional iOS test cases
 │   ├── utils/                # Helper utilities
 │   └── types/                # TypeScript type definitions
 ├── scripts/                  # Shell scripts for environment setup
