@@ -63,4 +63,39 @@ export class CheckoutInfoPage extends BasePage {
     }
     return '';
   }
+
+  /**
+   * Set first name field
+   */
+  async setFirstName(firstName: string): Promise<void> {
+    await this.setText(this.selectors.firstNameInput, firstName);
+  }
+
+  /**
+   * Set last name field
+   */
+  async setLastName(lastName: string): Promise<void> {
+    await this.setText(this.selectors.lastNameInput, lastName);
+  }
+
+  /**
+   * Set postal code field
+   */
+  async setPostalCode(postalCode: string): Promise<void> {
+    await this.setText(this.selectors.postalCodeInput, postalCode);
+  }
+
+  /**
+   * Continue to payment page (alias for continue for compatibility)
+   */
+  async continueToPayment(): Promise<void> {
+    await this.continue();
+  }
+
+  /**
+   * Check if error message is displayed
+   */
+  async isErrorMessageDisplayed(): Promise<boolean> {
+    return await this.isElementDisplayed(this.selectors.errorMessage);
+  }
 } 

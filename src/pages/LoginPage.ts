@@ -127,4 +127,14 @@ export class LoginPage extends BasePage {
   async waitForPageToLoad(): Promise<void> {
     await this.waitForElementToBeDisplayed(this.usernameField);
   }
+
+  /**
+   * Open the login page
+   */
+  async open(): Promise<void> {
+    // For mobile apps, we typically don't navigate to login page
+    // as it's often the first screen that appears when the app launches
+    // Just wait for the login page to load
+    await this.waitForPageToLoad();
+  }
 } 

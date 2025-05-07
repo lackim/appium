@@ -263,4 +263,82 @@ export class CartPage extends BasePage {
       return false;
     }
   }
+
+  /**
+   * Open cart page
+   */
+  async open(): Promise<void> {
+    // Use the existing method to navigate to cart
+    await this.navigateToCart();
+    
+    // Wait for the cart page to load
+    await this.waitForPageToLoad();
+  }
+
+  /**
+   * Proceed to checkout (alias for proceedToCheckout for compatibility)
+   */
+  async checkoutFromCart(): Promise<void> {
+    await this.proceedToCheckout();
+  }
+
+  /**
+   * Check if a product is in the cart by name
+   */
+  async isProductInCart(productName: string): Promise<boolean> {
+    try {
+      await this.waitForPageToLoad();
+      
+      // Get all cart items
+      const items = await this.getCartItems();
+      
+      // Check each item to see if it matches the product name
+      for (const item of items) {
+        const itemTitleElement = await item.$(this.selectors.itemTitle);
+        const itemTitle = await itemTitleElement.getText();
+        if (itemTitle === productName) {
+          return true;
+        }
+      }
+      
+      return false;
+    } catch (error) {
+      console.error(`Error checking if product is in cart: ${error}`);
+      return false;
+    }
+  }
+
+  /**
+   * Remove a product from the cart by name
+   */
+  async removeProduct(productName: string): Promise<void> {
+    try {
+      // Make sure we're on the cart page
+      await this.waitForPageToLoad();
+      
+      // Get all cart items
+      const items = await this.getCartItems();
+      
+      // Find the item with the matching name and remove it
+      for (const item of items) {
+        const itemTitleElement = await item.$(this.selectors.itemTitle);
+        const itemTitle = await itemTitleElement.getText();
+        
+        if (itemTitle === productName) {
+          const removeButton = await item.$(this.selectors.removeButton);
+          await removeButton.click();
+          
+          // Wait a moment for the cart to update
+          await this.pause(1000);
+          return;
+        }
+      }
+      
+      // If we get here, the product wasn't found
+      throw new Error(`Product "${productName}" not found in cart`);
+    } catch (error) {
+      console.error(`Error removing product from cart: ${error}`);
+      throw error;
+    }
+  }
 } 
