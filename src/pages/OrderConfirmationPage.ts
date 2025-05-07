@@ -6,105 +6,65 @@ import { OrderConfirmation } from '../types';
  */
 export class OrderConfirmationPage extends BasePage {
   private selectors = {
-    confirmationMessage: '~confirmation-message',
-    orderNumber: '~order-number',
-    orderDate: '~order-date',
-    orderTotal: '~order-total',
-    shippingAddress: '~shipping-address',
-    paymentMethod: '~payment-method',
-    deliveryDate: '~delivery-date',
-    continueShoppingButton: '~continue-shopping-button',
-    viewOrderDetailsButton: '~view-order-details-button'
+    completeHeader: '~test-THANK YOU FOR YOU ORDER',
+    completeText: '~test-Your order has been dispatched, and will arrive just as fast as the pony can get there!',
+    backHomeButton: '~test-BACK HOME',
+    checkoutCompletePage: '~test-CHECKOUT: COMPLETE!'
   };
 
   /**
-   * Get order confirmation message
+   * Wait for confirmation page to load
    */
-  async getConfirmationMessage(): Promise<string> {
-    return this.getText(this.selectors.confirmationMessage);
+  async waitForPageToLoad(): Promise<void> {
+    await this.waitForElementToBeDisplayed(this.selectors.checkoutCompletePage);
   }
 
   /**
-   * Get order number
+   * Get order confirmation message (header)
    */
-  async getOrderNumber(): Promise<string> {
-    return this.getText(this.selectors.orderNumber);
+  async getConfirmationHeader(): Promise<string> {
+    return this.getText(this.selectors.completeHeader);
   }
 
   /**
-   * Get order date
+   * Get order confirmation text
    */
-  async getOrderDate(): Promise<string> {
-    return this.getText(this.selectors.orderDate);
-  }
-
-  /**
-   * Get order total
-   */
-  async getOrderTotal(): Promise<string> {
-    return this.getText(this.selectors.orderTotal);
-  }
-
-  /**
-   * Get shipping address
-   */
-  async getShippingAddress(): Promise<string> {
-    return this.getText(this.selectors.shippingAddress);
-  }
-
-  /**
-   * Get payment method
-   */
-  async getPaymentMethod(): Promise<string> {
-    return this.getText(this.selectors.paymentMethod);
-  }
-
-  /**
-   * Get estimated delivery date
-   */
-  async getDeliveryDate(): Promise<string> {
-    return this.getText(this.selectors.deliveryDate);
+  async getConfirmationText(): Promise<string> {
+    return this.getText(this.selectors.completeText);
   }
 
   /**
    * Get complete order confirmation data
+   * Note: In the sample app, there is no order number, date or other details
    */
   async getOrderConfirmation(): Promise<OrderConfirmation> {
     return {
-      orderNumber: await this.getOrderNumber(),
-      orderDate: await this.getOrderDate(),
-      orderTotal: await this.getOrderTotal(),
-      deliveryDate: await this.getDeliveryDate()
+      orderNumber: 'N/A',
+      orderDate: new Date().toISOString(),
+      orderTotal: 'N/A',
+      deliveryDate: 'N/A'
     };
   }
 
   /**
-   * Continue shopping
+   * Return to home page
    */
-  async continueShopping(): Promise<void> {
-    await this.click(this.selectors.continueShoppingButton);
-  }
-
-  /**
-   * View order details
-   */
-  async viewOrderDetails(): Promise<void> {
-    await this.click(this.selectors.viewOrderDetailsButton);
+  async backToHome(): Promise<void> {
+    await this.click(this.selectors.backHomeButton);
   }
 
   /**
    * Verify order was placed successfully
    */
   async isOrderSuccessful(): Promise<boolean> {
-    const confirmationMsg = await this.getConfirmationMessage();
-    return confirmationMsg.toLowerCase().includes('success') ||
-           confirmationMsg.toLowerCase().includes('thank you');
+    const header = await this.getConfirmationHeader();
+    return header.includes('THANK YOU');
   }
   
   /**
    * Check if confirmation screen is displayed
    */
   async isConfirmationDisplayed(): Promise<boolean> {
-    return this.isElementDisplayed(this.selectors.confirmationMessage);
+    return this.isElementDisplayed(this.selectors.completeHeader);
   }
 } 

@@ -10,6 +10,7 @@ export class TestStateManager {
   
   // Current test's state
   private currentProduct: Product | null = null;
+  private productList: Product[] = [];
   private currentCustomer: CustomerInfo | null = null;
   private currentPayment: PaymentInfo | null = null;
   private orderSummary: OrderSummary | null = null;
@@ -45,6 +46,7 @@ export class TestStateManager {
    */
   resetState(): void {
     this.currentProduct = null;
+    this.productList = [];
     this.currentCustomer = null;
     this.currentPayment = null;
     this.orderSummary = null;
@@ -59,6 +61,7 @@ export class TestStateManager {
    */
   setCurrentProduct(product: Product): void {
     this.currentProduct = product;
+    this.addProductToList(product);
   }
 
   /**
@@ -66,6 +69,20 @@ export class TestStateManager {
    */
   getCurrentProduct(): Product | null {
     return this.currentProduct;
+  }
+
+  /**
+   * Add a product to the list of products in the current test
+   */
+  addProductToList(product: Product): void {
+    this.productList.push(product);
+  }
+
+  /**
+   * Get all products in the current test
+   */
+  getAllProducts(): Product[] {
+    return [...this.productList];
   }
 
   /**

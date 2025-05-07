@@ -6,31 +6,30 @@ import { CustomerInfo } from '../types';
  */
 export class CheckoutInfoPage extends BasePage {
   private selectors = {
-    firstNameInput: '~first-name-input',
-    lastNameInput: '~last-name-input',
-    addressInput: '~address-input',
-    cityInput: '~city-input',
-    stateInput: '~state-input',
-    zipCodeInput: '~zip-code-input',
-    phoneInput: '~phone-input',
-    emailInput: '~email-input',
-    continueButton: '~continue-button',
-    cancelButton: '~cancel-button',
-    errorMessage: '~error-message'
+    firstNameInput: '~test-First Name',
+    lastNameInput: '~test-Last Name',
+    postalCodeInput: '~test-Zip/Postal Code',
+    continueButton: '~test-CONTINUE',
+    cancelButton: '~test-CANCEL',
+    errorMessage: '~test-Error message',
+    checkoutScreen: '~test-Checkout: Your Info'
   };
 
   /**
-   * Fill the checkout information form
+   * Wait for checkout info page to load
+   */
+  async waitForPageToLoad(): Promise<void> {
+    await this.waitForElementToBeDisplayed(this.selectors.checkoutScreen);
+  }
+
+  /**
+   * Fill the checkout information form with minimum required fields
+   * (only first name, last name, and postal code are required)
    */
   async fillCheckoutInfo(checkoutInfo: CustomerInfo): Promise<void> {
     await this.setText(this.selectors.firstNameInput, checkoutInfo.firstName);
     await this.setText(this.selectors.lastNameInput, checkoutInfo.lastName);
-    await this.setText(this.selectors.addressInput, checkoutInfo.address);
-    await this.setText(this.selectors.cityInput, checkoutInfo.city);
-    await this.setText(this.selectors.stateInput, checkoutInfo.state);
-    await this.setText(this.selectors.zipCodeInput, checkoutInfo.zipCode);
-    await this.setText(this.selectors.phoneInput, checkoutInfo.phone);
-    await this.setText(this.selectors.emailInput, checkoutInfo.email);
+    await this.setText(this.selectors.postalCodeInput, checkoutInfo.zipCode);
   }
 
   /**

@@ -12,16 +12,16 @@ export class BasePage {
   /**
    * Wait for an element to be visible
    */
-  async waitForElement(selector: string, timeout = 10000): Promise<any> {
+  async waitForElement(selector: string, timeout = 30000): Promise<any> {
     const element = await this.driver.$(selector);
     await element.waitForDisplayed({ timeout });
     return element;
   }
 
   /**
-   * Wait for element to be displayed
+   * Wait for element to be displayed with timeout
    */
-  async waitForElementToBeDisplayed(selector: string, timeout = 10000): Promise<void> {
+  async waitForElementToBeDisplayed(selector: string, timeout = 30000): Promise<void> {
     await this.waitForElement(selector, timeout);
   }
 
@@ -57,12 +57,13 @@ export class BasePage {
   }
 
   /**
-   * Check if element exists
+   * Check if element exists and is displayed, with a built-in wait.
    */
-  async isElementDisplayed(selector: string): Promise<boolean> {
+  async isElementDisplayed(selector: string, timeout = 5000): Promise<boolean> {
     try {
       const element = await this.driver.$(selector);
-      return element.isDisplayed();
+      await element.waitForDisplayed({ timeout });
+      return true;
     } catch (error) {
       return false;
     }
@@ -140,5 +141,147 @@ export class BasePage {
    */
   async swipeDown(distance = 0.7, durationMs = 800): Promise<void> {
     await this.swipeVertical(0.3, 0.7, durationMs);
+  }
+
+  /**
+   * Take a screenshot for debugging purposes
+   */
+  async takeDebugScreenshot(name: string): Promise<string> {
+    try {
+      // Ensure screenshots directory exists
+      const screenshotDir = './screenshots';
+      if (!fs.existsSync(screenshotDir)) {
+        fs.mkdirSync(screenshotDir, { recursive: true });
+      }
+      
+      // Create a timestamp-based filename with sanitized name
+      const timestamp = Date.now();
+      const sanitizedName = name.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+      const filename = `${screenshotDir}/debug-${sanitizedName}-${timestamp}.png`;
+      
+      // Save the screenshot
+      await this.driver.saveScreenshot(filename);
+      console.log(`✓ Debug screenshot saved: ${name}`);
+      return filename;
+    } catch (error) {
+      console.error(`Failed to take debug screenshot: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Check if element exists (without waiting for it to be displayed)
+   */
+  async elementExists(selector: string): Promise<boolean> {
+    try {
+      const element = await this.driver.$(selector);
+      return await element.isExisting();
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Retry an action with exponential backoff
+   */
+  async retryOperation<T>(
+    operation: () => Promise<T>,
+    maxAttempts = 3,
+    baseDelayMs = 500
+  ): Promise<T> {
+    let lastError: Error | unknown;
+    
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error;
+        if (attempt < maxAttempts) {
+          const delayMs = baseDelayMs * Math.pow(2, attempt - 1);
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+      }
+    }
+    
+    throw lastError;
+  }
+
+  /**
+   * Wait for a condition to be true
+   */
+  async waitForCondition(
+    condition: () => Promise<boolean>,
+    timeoutMs = 10000,
+    intervalMs = 500,
+    message = 'Condition not met within timeout'
+  ): Promise<void> {
+    const startTime = Date.now();
+    
+    while (Date.now() - startTime < timeoutMs) {
+      if (await condition()) {
+        return;
+      }
+      await new Promise(resolve => setTimeout(resolve, intervalMs));
+    }
+    
+    throw new Error(message);
+  }
+
+  /**
+   * Pause execution for a specified time
+   * This can be used to stabilize UI state between operations
+   */
+  async pause(milliseconds: number): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, milliseconds));
+  }
+  
+  /**
+   * Standardized method to navigate to cart that can be used from any page
+   * This provides consistent cart navigation across the entire test suite
+   */
+  async navigateToCart(maxRetries = 3): Promise<void> {
+    const cartSelectors = [
+      '~test-Cart',                                // Standard cart icon
+      '//XCUIElementTypeOther[contains(@name, "Cart")]',  // XPath for cart
+      '//XCUIElementTypeOther[contains(@name, "test-Cart")]'  // Another variant
+    ];
+    
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        // Take screenshot before attempting to navigate to cart
+        await this.takeDebugScreenshot(`navigate-to-cart-attempt-${attempt + 1}`);
+        
+        // Try each selector
+        for (const selector of cartSelectors) {
+          try {
+            const isXPath = selector.startsWith('//') || selector.startsWith('(//');
+            
+            // Check if element is displayed
+            const element = await this.driver.$(selector);
+            if (await element.isDisplayed()) {
+              // Click the element
+              await element.click();
+              await this.pause(2000);
+              return;
+            }
+          } catch (error) {
+            // Continue to the next selector
+            console.log(`Cart selector ${selector} not found or not clickable`);
+          }
+        }
+        
+        // If we reach here, we couldn't find a suitable cart element
+        await this.pause(1000);
+      } catch (error) {
+        await this.takeDebugScreenshot(`navigate-to-cart-error-${attempt + 1}`);
+        if (attempt === maxRetries - 1) {
+          throw new Error(`Failed to navigate to cart after ${maxRetries} attempts: ${error}`);
+        }
+        // Wait before next attempt
+        await this.pause(1000);
+      }
+    }
+    
+    throw new Error('Failed to navigate to cart: no cart element found');
   }
 } 

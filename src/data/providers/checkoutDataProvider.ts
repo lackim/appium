@@ -12,6 +12,16 @@ export interface CheckoutTestData {
 }
 
 /**
+ * Interface for checkout data with multiple products
+ */
+export interface MultipleItemsCheckoutTestData {
+  products: Product[];
+  customer: CustomerInfo;
+  payment: PaymentInfo;
+  description: string;
+}
+
+/**
  * Provides data sets for checkout tests
  */
 export class CheckoutDataProvider {
@@ -24,6 +34,22 @@ export class CheckoutDataProvider {
       customer: CustomerDataGenerator.generateValidCustomer(),
       payment: PaymentDataGenerator.generateValidPayment(),
       description: 'Valid checkout with standard shipping and same billing address'
+    };
+  }
+
+  /**
+   * Get data for a checkout test with multiple products
+   */
+  static getMultipleItemsData(): MultipleItemsCheckoutTestData {
+    // Get 2-3 random products to add to cart
+    const allProducts = ProductDataGenerator.getAllProducts();
+    const selectedProducts = allProducts.slice(0, 3); // Take first 3 products
+    
+    return {
+      products: selectedProducts,
+      customer: CustomerDataGenerator.generateValidCustomer(),
+      payment: PaymentDataGenerator.generateValidPayment(),
+      description: 'Checkout with multiple items in cart'
     };
   }
 

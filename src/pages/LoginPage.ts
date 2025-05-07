@@ -1,5 +1,6 @@
 import { BasePage } from './BasePage';
 import logger from '../utils/logger';
+import { CREDENTIALS } from '../test-data/credentials'; // Corrected import path
 
 /**
  * Page object representing the Login page in the SauceLabs Mobile App
@@ -38,16 +39,40 @@ export class LoginPage extends BasePage {
   }
 
   /**
-   * Login with the provided credentials
-   * @param username - Username to enter
-   * @param password - Password to enter
+   * Login with provided credentials
    */
-  async login(username: string, password: string): Promise<void> {
-    logger.info(`Logging in with username: ${username}`);
-    await this.waitAndSendKeys(this.usernameField, username);
-    await this.waitAndSendKeys(this.passwordField, password);
-    await this.waitAndClick(this.loginButton);
-    await this.driver.pause(1000); // Wait for animation/transition
+  async login(username: string, password: string, maxRetries = 3): Promise<void> {
+    try {
+      logger.info(`Logging in with username: ${username}`);
+      
+      // Wait for login form
+      await this.waitForPageToLoad();
+      await this.pause(1000);
+      
+      // Enter username
+      const usernameField = await this.waitForElement(this.usernameField);
+      await usernameField.clearValue();
+      await usernameField.clearValue(); // Double clear for reliability
+      await usernameField.setValue(username);
+      await this.pause(500);
+      
+      // Enter password
+      const passwordField = await this.waitForElement(this.passwordField);
+      await passwordField.clearValue();
+      await passwordField.clearValue(); // Double clear for reliability
+      await passwordField.setValue(password);
+      await this.pause(500);
+      
+      // Click login button
+      await this.click(this.loginButton);
+      
+      // Allow time for login to process
+      await this.pause(1000);
+    } catch (error) {
+      // Take a debug screenshot if login fails
+      await this.takeDebugScreenshot('login-failure');
+      throw new Error(`Login failed: ${error}`);
+    }
   }
 
   /**
@@ -70,21 +95,21 @@ export class LoginPage extends BasePage {
    * Login with standard user credentials
    */
   async loginAsStandardUser(): Promise<void> {
-    await this.login('standard_user', 'secret_sauce');
+    await this.login(CREDENTIALS.STANDARD_USER.USERNAME, CREDENTIALS.STANDARD_USER.PASSWORD);
   }
 
   /**
    * Login with locked out user credentials
    */
   async loginAsLockedOutUser(): Promise<void> {
-    await this.login('locked_out_user', 'secret_sauce');
+    await this.login(CREDENTIALS.LOCKED_OUT_USER.USERNAME, CREDENTIALS.LOCKED_OUT_USER.PASSWORD);
   }
 
   /**
    * Login with problem user credentials
    */
   async loginAsProblemUser(): Promise<void> {
-    await this.login('problem_user', 'secret_sauce');
+    await this.login(CREDENTIALS.PROBLEM_USER.USERNAME, CREDENTIALS.PROBLEM_USER.PASSWORD);
   }
 
   /**
@@ -93,5 +118,13 @@ export class LoginPage extends BasePage {
    */
   async isPageDisplayed(): Promise<boolean> {
     return await this.isElementDisplayed(this.usernameField);
+  }
+
+  /**
+   * Wait for the login page to load
+   * This will wait until the username field is displayed
+   */
+  async waitForPageToLoad(): Promise<void> {
+    await this.waitForElementToBeDisplayed(this.usernameField);
   }
 } 

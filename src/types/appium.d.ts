@@ -18,14 +18,16 @@ interface ProductDetails {
   quantity?: number;
 }
 
-interface CheckoutInfo {
-  firstName: string;
-  lastName: string;
-  postalCode: string;
-}
-
-interface PaymentInfo {
-  cardNumber: string;
-  expiryDate: string;
-  cvv: string;
-} 
+// Removing conflicting global interface declarations.
+// These types are now imported from './checkout.types.ts' via './index.ts'.
+// interface CheckoutInfo {
+//   firstName: string;
+//   lastName: string;
+//   postalCode: string;
+// }
+// 
+// interface PaymentInfo {
+//   cardNumber: string;
+//   expiryDate: string;
+//   cvv: string;
+// } 

@@ -2,83 +2,106 @@ import { BasePage } from './BasePage';
 import { PaymentInfo } from '../types';
 
 /**
- * Payment Details Page Object - represents the payment information form screen
+ * Payment Details Page Object - represents the checkout overview screen
+ * Note: The sample app doesn't have a separate payment form, 
+ * it jumps directly to the checkout overview after entering customer info
  */
 export class PaymentDetailsPage extends BasePage {
   private selectors = {
-    cardNumberInput: '~card-number-input',
-    expirationDateInput: '~expiration-date-input',
-    cvvInput: '~cvv-input',
-    cardHolderNameInput: '~card-holder-name-input',
-    billingAddressCheckbox: '~billing-address-same-checkbox',
-    billingAddressInput: '~billing-address-input',
-    billingCityInput: '~billing-city-input',
-    billingStateInput: '~billing-state-input',
-    billingZipCodeInput: '~billing-zip-code-input',
-    reviewOrderButton: '~review-order-button',
-    backButton: '~back-button',
-    errorMessage: '~payment-error-message'
+    finishButton: '~test-FINISH',
+    cancelButton: '~test-CANCEL',
+    checkoutOverviewScreen: '~test-CHECKOUT: OVERVIEW',
+    paymentInfoLabel: '~test-Payment Information:',
+    shippingInfoLabel: '~test-Shipping Information:',
+    itemTotal: '~test-Item total:',
+    tax: '~test-Tax:',
+    total: '~test-Total:',
+    cartItems: '~test-Item'
   };
 
   /**
-   * Fill the payment information form
+   * Wait for payment/checkout overview page to load
    */
-  async fillPaymentInfo(paymentInfo: PaymentInfo): Promise<void> {
-    await this.setText(this.selectors.cardNumberInput, paymentInfo.cardNumber);
-    await this.setText(this.selectors.expirationDateInput, paymentInfo.expirationDate);
-    await this.setText(this.selectors.cvvInput, paymentInfo.cvv);
-    await this.setText(this.selectors.cardHolderNameInput, paymentInfo.cardHolderName);
+  async waitForPageToLoad(): Promise<void> {
+    await this.waitForElementToBeDisplayed(this.selectors.checkoutOverviewScreen);
+  }
 
-    if (paymentInfo.useSameAddress === false) {
-      await this.click(this.selectors.billingAddressCheckbox);
-      
-      if (paymentInfo.billingAddress) {
-        await this.setText(this.selectors.billingAddressInput, paymentInfo.billingAddress);
-      }
-      
-      if (paymentInfo.billingCity) {
-        await this.setText(this.selectors.billingCityInput, paymentInfo.billingCity);
-      }
-      
-      if (paymentInfo.billingState) {
-        await this.setText(this.selectors.billingStateInput, paymentInfo.billingState);
-      }
-      
-      if (paymentInfo.billingZipCode) {
-        await this.setText(this.selectors.billingZipCodeInput, paymentInfo.billingZipCode);
-      }
+  /**
+   * Proceed to finish the order
+   */
+  async finishOrder(): Promise<void> {
+    await this.click(this.selectors.finishButton);
+  }
+
+  /**
+   * Cancel the order
+   */
+  async cancel(): Promise<void> {
+    await this.click(this.selectors.cancelButton);
+  }
+
+  /**
+   * Get payment information text
+   */
+  async getPaymentInfo(): Promise<string> {
+    return this.getText(this.selectors.paymentInfoLabel);
+  }
+
+  /**
+   * Get shipping information text
+   */
+  async getShippingInfo(): Promise<string> {
+    return this.getText(this.selectors.shippingInfoLabel);
+  }
+
+  /**
+   * Get item total amount
+   */
+  async getItemTotal(): Promise<string> {
+    return this.getText(this.selectors.itemTotal);
+  }
+
+  /**
+   * Get tax amount
+   */
+  async getTax(): Promise<string> {
+    return this.getText(this.selectors.tax);
+  }
+
+  /**
+   * Get total amount
+   */
+  async getTotal(): Promise<string> {
+    return this.getText(this.selectors.total);
+  }
+
+  /**
+   * Get number of items in the checkout overview
+   */
+  async getItemCount(): Promise<number> {
+    try {
+      const items = await this.driver.$$(this.selectors.cartItems);
+      return items.length;
+    } catch (error) {
+      return 0;
     }
-  }
-
-  /**
-   * Navigate to order review
-   */
-  async reviewOrder(): Promise<void> {
-    await this.click(this.selectors.reviewOrderButton);
-  }
-
-  /**
-   * Go back to checkout information page
-   */
-  async goBack(): Promise<void> {
-    await this.click(this.selectors.backButton);
   }
 
   /**
    * Fill payment details and proceed to review
+   * This is a utility method for the sample app that might not have actual payment fields
+   * but just review the information before finalizing the order
    */
   async fillAndReview(paymentInfo: PaymentInfo): Promise<void> {
-    await this.fillPaymentInfo(paymentInfo);
-    await this.reviewOrder();
-  }
-
-  /**
-   * Get error message if present
-   */
-  async getErrorMessage(): Promise<string> {
-    if (await this.isElementDisplayed(this.selectors.errorMessage)) {
-      return this.getText(this.selectors.errorMessage);
-    }
-    return '';
+    // In the sample app, we might not have actual payment form fields
+    // This is just a helper method to wait for the page to load and proceed
+    await this.waitForPageToLoad();
+    
+    // Log payment info being used (for debugging)
+    console.log(`Using payment info: ${JSON.stringify(paymentInfo)}`);
+    
+    // In a real app, we would fill in credit card details, etc.
+    // For the sample app, we just proceed to finish
+    await this.finishOrder();
   }
 } 

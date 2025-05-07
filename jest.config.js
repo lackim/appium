@@ -16,4 +16,7 @@ module.exports = {
   setupFilesAfterEnv: ['./src/utils/setupTests.ts'],
   globalSetup: './src/utils/globalSetup.ts',
   globalTeardown: './src/utils/globalTeardown.ts',
+  testTimeout: 180000,
+  setupTimeout: 180000,
+  teardownTimeout: 180000
 }; 

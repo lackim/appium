@@ -27,40 +27,71 @@ export default async function globalSetup(): Promise<void> {
   // Ensure screenshot directory exists
   ensureScreenshotDir();
   
-  // Get capabilities from configuration
-  const platform = configManager.getPlatform();
-  const rawCapabilities = configManager.getConfig();
-  
-  // Clean capabilities to ensure no undefined values
-  const capabilities = cleanCapabilities<WebdriverIO.Capabilities>(rawCapabilities);
-  
-  // Log platform info
-  logger.info('Test configuration:', {
-    platform: configManager.getPlatform(),
-    deviceName: configManager.getDeviceName(),
-    platformVersion: configManager.getPlatformVersion(),
-    appPath: configManager.getAppPath()
-  });
-  
   try {
-    // Initialize WebDriver for use in tests
-    logger.info('Initializing WebDriver');
+    // Get capabilities from configuration
+    const platform = configManager.getPlatform();
+    const rawCapabilities = configManager.getConfig();
     
-    const driver = await remote({
-      protocol: 'http',
-      hostname: '127.0.0.1',
-      port: 4723,
-      path: '/',
-      capabilities,
-      logLevel: 'info'
+    // Remove webDriverAgentUrl if it exists using type assertion
+    if (rawCapabilities && 'appium:webDriverAgentUrl' in rawCapabilities) {
+      delete (rawCapabilities as any)['appium:webDriverAgentUrl'];
+    }
+    
+    // Add optimized WebDriverAgent settings
+    if (rawCapabilities) {
+      // Add updated capabilities for iOS - use any assertion to avoid TypeScript errors
+      if (platform === 'ios') {
+        (rawCapabilities as any)['appium:useNewWDA'] = false;
+        (rawCapabilities as any)['appium:derivedDataPath'] = path.resolve('./derived_data');
+        (rawCapabilities as any)['appium:wdaStartupRetries'] = 4;
+        (rawCapabilities as any)['appium:wdaStartupRetryInterval'] = 20000;
+        (rawCapabilities as any)['appium:showXcodeLog'] = true;
+        (rawCapabilities as any)['appium:usePrebuiltWDA'] = true;
+        (rawCapabilities as any)['appium:wdaLaunchTimeout'] = 240000;
+        (rawCapabilities as any)['appium:wdaConnectionTimeout'] = 240000;
+        (rawCapabilities as any)['appium:newCommandTimeout'] = 180000;
+        (rawCapabilities as any)['appium:shouldUseSingletonTestManager'] = false;
+        (rawCapabilities as any)['appium:waitForQuiescence'] = false;
+        (rawCapabilities as any)['appium:maxTypingFrequency'] = 30;
+      }
+    }
+    
+    // Clean capabilities to ensure no undefined values
+    const capabilities = cleanCapabilities<WebdriverIO.Capabilities>(rawCapabilities);
+    
+    // Log platform info
+    logger.info('Test configuration:', {
+      platform: configManager.getPlatform(),
+      deviceName: configManager.getDeviceName(),
+      platformVersion: configManager.getPlatformVersion(),
+      appPath: configManager.getAppPath()
     });
     
-    // Store driver in global for access in tests
-    (global as any).driver = driver;
-    
-    logger.info('WebDriver initialized successfully');
+    try {
+      // Initialize WebDriver for use in tests
+      logger.info('Initializing WebDriver');
+      
+      const driver = await remote({
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: 4723,
+        path: '/',
+        capabilities,
+        logLevel: 'info',
+        connectionRetryTimeout: 240000,
+        connectionRetryCount: 3
+      });
+      
+      // Store driver in global for access in tests
+      (global as any).driver = driver;
+      
+      logger.info('WebDriver initialized successfully');
+    } catch (error) {
+      logger.error('Failed to initialize WebDriver', error);
+      // Don't throw, let tests handle this situation
+    }
   } catch (error) {
-    logger.error('Failed to initialize WebDriver', error);
+    logger.error('Failed during setup', error);
     // Don't throw, let tests handle this situation
   }
 } 

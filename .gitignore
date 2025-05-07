@@ -64,3 +64,26 @@ apps/*.zip
 # Cache
 .npm
 .eslintcache nohup.out
+
+# Derived data
+derived_data/
+
+# Module files and generated files with hash identifiers
+# *.pcm
+# *-[0-9A-Z]*
+# IOSurface-*
+# libxml2-*
+# mach-*
+# Metal-*
+# MobileCoreServices-*
+# netinet_in-*
+
+# Additional derived data files
+# info.plist
+# lock
+# v3.actions*
+# v8.data*
+# v8.index*
+# modules.timestamp
+# Session.modulevalidation*
+# *.shared
