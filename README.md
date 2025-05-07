@@ -23,10 +23,7 @@ This project implements automated UI tests for an iOS mobile application using A
 │   ├── pages/                # Page Object Models
 │   ├── scripts/              # Utility scripts for setup and debugging
 │   ├── tests/                # Test cases
-│   │   ├── ios/              # iOS-specific tests
-│   │   │   ├── login.test.ts # Authentication tests
-│   │   │   └── checkout-flow.test.ts # Checkout flow tests
-│   │   └── README.md         # Test structure documentation
+│   │   └── ios/              # iOS-specific tests
 │   ├── utils/                # Helper utilities
 │   └── types/                # TypeScript type definitions
 ├── scripts/                  # Shell scripts for environment setup
@@ -34,11 +31,9 @@ This project implements automated UI tests for an iOS mobile application using A
 └── README.md                 # Project documentation
 ```
 
-## Implemented Tests
+## Test Implementation
 
-The automation suite covers the following test scenarios:
-
-### Core Flow
+### Core Test Flow
 1. Adding products to the shopping cart
 2. Verifying the added product is displayed in the cart
 3. Proceeding to checkout and filling in all required information
@@ -51,19 +46,39 @@ The automation suite covers the following test scenarios:
 - Product filtering functionality
 - Cart management (adding/removing items)
 
+### Test Organization
+- Test files: `feature-name.test.ts`
+- Test suites: Descriptive of feature being tested
+- Test cases: Should start with "should" and describe expected behavior
+
 ## Setup Instructions
 
 1. Clone this repository
 2. Install dependencies:
-   ```
+   ```bash
    npm install
    ```
 3. Configure environment variables for your test environment
 4. Download the sample app from [GitHub](https://github.com/saucelabs/sample-app-mobile/releases/) or use a similar app
 
-## Launching iOS Tests
+## Running Tests
 
-To run iOS automated tests with this framework, follow these steps:
+```bash
+# Run all tests
+npm test
+
+# Run iOS tests only
+npm run test:ios
+
+# Run specific test files
+npm run test:checkout
+npm run test:login
+
+# Run tests matching specific pattern
+npm test -- -t "should login successfully"
+```
+
+## iOS Testing Environment Setup
 
 ### 1. Start the iOS Testing Environment
 
@@ -76,10 +91,9 @@ This will automatically:
 - Launch Appium server with relaxed security
 - Configure everything for testing
 
-### 2. Use Appium Inspector
+### 2. Appium Inspector Configuration
 
-Once the environment is running, you can use Appium Inspector with the configuration shown in the terminal:
-
+Once the environment is running, use Appium Inspector with:
 - Remote Host: `localhost`
 - Remote Port: `4723`
 - Remote Path: `/`
@@ -96,43 +110,18 @@ Once the environment is running, you can use Appium Inspector with the configura
   }
   ```
 
-### 3. Run Tests
-
-To run a simple test script that validates the setup:
-
-```bash
-npm run appium:test
-```
-
-For running the test suite:
-
-```bash
-npm run test:ios
-```
-
 ## Troubleshooting
 
-If you encounter issues with WebDriverAgent, refer to the [iOS Testing Guide](docs/ios-testing.md) for detailed troubleshooting steps.
+### WebDriverAgent Issues
 
-## Development Notes
-
-This project implements:
-- Page Object Model (POM) for better test structure and maintainability
-- Configuration files for iOS-specific settings
-- Environment variables for dynamic parameter management
-- Helper methods and framework-level action wrappers
-- Dynamic waits and optimized test execution 
-
-## Troubleshooting Appium Inspector for iOS 18.4
-
-If you encounter the error "The file 'project.xcworkspace' could not be unlocked", follow these steps:
+If you encounter the error "The file 'project.xcworkspace' could not be unlocked":
 
 1. Stop all Appium processes:
 ```bash
 pkill -f appium
 ```
 
-2. Fix permissions for the WebDriverAgent directory:
+2. Fix permissions:
 ```bash
 sudo chmod -R 777 node_modules/appium-xcuitest-driver/node_modules/appium-webdriveragent/
 ```
@@ -147,45 +136,41 @@ rm -rf ~/Library/Developer/Xcode/DerivedData/WebDriverAgent-*
 npx appium driver run xcuitest build-wda
 ```
 
-5. Run Appium with relaxed-security flag:
+5. Run Appium with relaxed-security:
 ```bash
 npx appium --relaxed-security
 ```
 
-6. In a separate terminal, start WebDriverAgent:
+6. Start WebDriverAgent:
 ```bash
 npx appium driver run xcuitest open-wda -p 8100 --debug
 ```
 
-7. Modify settings in the ios.config.ts file:
+7. Update ios.config.ts:
 ```typescript
 export const iosConfig = {
-  // ... existing settings
   'appium:webDriverAgentUrl': 'http://localhost:8100',
-  'appium:useNewWDA': false, // Don't restart WDA
-  'appium:usePrebuiltWDA': true // Use existing WDA
+  'appium:useNewWDA': false,
+  'appium:usePrebuiltWDA': true
 };
 ```
 
-8. Check if WebDriverAgent is running:
+8. Verify WebDriverAgent:
 ```bash
 curl http://localhost:8100/status
 ```
 
-If problems persist, consider using an older iOS version (e.g., 17.x) or a physical iOS device.
+## Development Notes
 
-## Implementing Page Objects without a working Appium Inspector
+### Page Object Implementation
+When Appium Inspector is unavailable, implement Page Objects using:
 
-If you can't run Appium Inspector for iOS 18.4, you can still implement abstract Page Objects as follows:
-
-1. Create base Page Object classes with approximate selectors based on iOS conventions:
-
+1. Base Page Object classes with approximate selectors:
 ```typescript
 // src/pages/LoginPage.ts
 import { BasePage } from './BasePage';
 
 export class LoginPage extends BasePage {
-  // Use predictable iOS selectors
   private usernameField = '~username'; // Accessibility ID
   private passwordField = '~password'; // Accessibility ID 
   private loginButton = '~login-button'; // Accessibility ID
@@ -198,36 +183,22 @@ export class LoginPage extends BasePage {
 }
 ```
 
-2. Use universal selectors that work across platforms:
-   - Accessibility ID (prefix `~`) - best choice
-   - XPath - use only when necessary
+2. Universal selector strategies:
+   - Accessibility ID (prefix `~`) - preferred
+   - XPath - use sparingly
    - Predicate strings - for complex iOS conditions
 
-3. Implement abstract Page Objects with future refactoring in mind:
+### Design Decisions
+- Page Object Model (POM) for better test structure and maintainability
+- Configuration files for iOS-specific settings
+- Environment variables for dynamic parameter management
+- Helper methods and framework-level action wrappers
+- Dynamic waits and optimized test execution
 
-```typescript
-// src/pages/ProductsPage.ts
-import { BasePage } from './BasePage';
+## Contributing
 
-export class ProductsPage extends BasePage {
-  // Placeholder selectors - to be updated later when Inspector access is available
-  private productsList = '~products-list';
-  private productItem = (name: string) => `~${name}`;
-  
-  async selectProduct(name: string): Promise<void> {
-    await this.waitForElement(this.productsList);
-    await this.waitAndClick(this.productItem(name));
-  }
-}
-```
-
-4. Add TODO comments in places that require verification of actual selectors:
-
-```typescript
-// TODO: Verify selectors after running Appium Inspector
-private checkoutButton = '~checkout';
-```
-
-This strategy allows you to implement a Page Object structure that you can easily update once you get Appium Inspector working or when you have access to a device with iOS 17.x. 
-
-> **Note on Test Migration**: We are currently migrating tests from the root-level `tests/` directory to `src/tests/`. All new tests should be created in the `src/tests/` directory following the organization described above. 
+1. Create feature branches from `main`
+2. Use conventional commits
+3. Submit PRs for review
+4. Merge to `main` after validation
+5. Tag significant milestones 
