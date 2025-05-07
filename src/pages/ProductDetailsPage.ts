@@ -80,6 +80,13 @@ export class ProductDetailsPage extends BasePage {
   }
 
   /**
+   * Get cart badge count (alias for getCartCount)
+   */
+  async getCartBadgeCount(): Promise<number> {
+    return this.getCartCount();
+  }
+
+  /**
    * Open cart with improved reliability
    */
   async openCart(maxRetries = 3): Promise<void> {

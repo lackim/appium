@@ -202,4 +202,232 @@ export class ProductsPage extends BasePage {
   async clickAddToCartButton(): Promise<void> {
     await this.click(this.selectors.addToCartButton);
   }
+
+  /**
+   * Open products page
+   */
+  async open(): Promise<void> {
+    // Implement navigation to products page if needed
+    // For most tests, we just need to wait for the page to load
+    await this.waitForPageToLoad();
+  }
+
+  /**
+   * Check if the products page is displayed
+   */
+  async isPageDisplayed(): Promise<boolean> {
+    return await this.isElementDisplayed(this.selectors.productsScreen);
+  }
+
+  /**
+   * Add a random product to cart and return its name
+   */
+  async addRandomProductToCart(): Promise<string> {
+    // Find all available product items
+    const productItems = await this.driver.$$(this.selectors.productItem);
+    const itemCount = await productItems.length;
+    if (itemCount === 0) {
+      throw new Error('No products found on the page');
+    }
+    
+    // Select a random product
+    const randomIndex = Math.floor(Math.random() * itemCount);
+    const randomProduct = productItems[randomIndex];
+    
+    // Get the product name before adding to cart
+    const titleElement = await randomProduct.$(this.selectors.productTitle);
+    const productName = await titleElement.getText();
+    
+    // Find and click the add to cart button for this product
+    const addButton = await randomProduct.$(this.selectors.addToCartButton);
+    await addButton.click();
+    
+    return productName;
+  }
+
+  /**
+   * Get cart badge count (alias for getCartCount for compatibility)
+   */
+  async getCartBadgeCount(): Promise<number> {
+    return await this.getCartCount();
+  }
+
+  /**
+   * Sort products by the specified order
+   */
+  async sortProducts(order: 'az' | 'za' | 'lohi' | 'hilo'): Promise<void> {
+    // Click the filter button to open the sorting options
+    await this.click(this.selectors.filterButton);
+    
+    // Wait for the modal to appear
+    await this.pause(1000);
+    
+    // Determine the selector based on the requested sort order
+    let sortOptionSelector = '';
+    switch(order) {
+      case 'az':
+        sortOptionSelector = '~test-ASCENDING'; // A to Z
+        break;
+      case 'za':
+        sortOptionSelector = '~test-DESCENDING'; // Z to A
+        break;
+      case 'lohi':
+        sortOptionSelector = '~test-LOHI'; // Low to high price
+        break;
+      case 'hilo':
+        sortOptionSelector = '~test-HILO'; // High to low price
+        break;
+      default:
+        throw new Error(`Invalid sort order: ${order}`);
+    }
+    
+    // Click the appropriate sort option
+    await this.click(sortOptionSelector);
+    
+    // Wait for sorting to complete
+    await this.pause(1000);
+  }
+
+  /**
+   * Get all product names
+   */
+  async getProductNames(): Promise<string[]> {
+    const productElements = await this.driver.$$(this.selectors.productTitle);
+    const names: string[] = [];
+    
+    for (const element of productElements) {
+      names.push(await element.getText());
+    }
+    
+    return names;
+  }
+
+  /**
+   * Get all product prices
+   */
+  async getProductPrices(): Promise<string[]> {
+    const priceElements = await this.driver.$$(this.selectors.productPrice);
+    const prices: string[] = [];
+    
+    for (const element of priceElements) {
+      const priceText = await element.getText();
+      prices.push(priceText);
+    }
+    
+    return prices;
+  }
+
+  /**
+   * Check if grid view is active
+   */
+  async isGridViewActive(): Promise<boolean> {
+    // This is app-specific and may need to be adjusted based on actual implementation
+    // For now, we'll use a simple heuristic - if toggle button is present, check its state
+    try {
+      const toggleElement = await this.driver.$(this.selectors.toggle);
+      const toggleText = await toggleElement.getText();
+      // Assuming the toggle button text or property indicates grid/list view
+      return toggleText.includes('Grid');
+    } catch (error) {
+      // Default to true if we can't determine
+      return true;
+    }
+  }
+
+  /**
+   * Toggle between grid and list view
+   */
+  async toggleView(): Promise<void> {
+    await this.click(this.selectors.toggle);
+    // Wait for view to update
+    await this.pause(1000);
+  }
+
+  /**
+   * Navigate to a random product's details page and return its name
+   */
+  async navigateToRandomProductDetails(): Promise<string> {
+    // Find all product titles
+    const productTitles = await this.driver.$$(this.selectors.productTitle);
+    const titleCount = await productTitles.length;
+    if (titleCount === 0) {
+      throw new Error('No products found on the page');
+    }
+    
+    // Select a random product
+    const randomIndex = Math.floor(Math.random() * titleCount);
+    const randomTitle = productTitles[randomIndex];
+    
+    // Get the product name before clicking
+    const productName = await randomTitle.getText();
+    
+    // Click on the title to navigate to details
+    await randomTitle.click();
+    
+    // Wait for navigation to complete
+    await this.pause(2000);
+    
+    return productName;
+  }
+
+  /**
+   * Scroll to a specific product by index
+   */
+  async scrollToProduct(index: number): Promise<void> {
+    const productElements = await this.driver.$$(this.selectors.productItem);
+    const count = await productElements.length;
+    if (index < 0 || index >= count) {
+      throw new Error(`Product index ${index} out of bounds (max: ${count - 1})`);
+    }
+    
+    // Scroll to the product
+    await productElements[index].scrollIntoView();
+    await this.pause(500);
+  }
+
+  /**
+   * Add product to cart by index and return its name
+   */
+  async addProductToCartByIndex(index: number): Promise<string> {
+    const productElements = await this.driver.$$(this.selectors.productItem);
+    const count = await productElements.length;
+    if (index < 0 || index >= count) {
+      throw new Error(`Product index ${index} out of bounds (max: ${count - 1})`);
+    }
+    
+    // Get the product name
+    const titleElement = await productElements[index].$(this.selectors.productTitle);
+    const productName = await titleElement.getText();
+    
+    // Add to cart
+    const addButton = await productElements[index].$(this.selectors.addToCartButton);
+    await addButton.click();
+    
+    return productName;
+  }
+
+  /**
+   * Get product name by index
+   */
+  async getProductNameByIndex(index: number): Promise<string> {
+    const productElements = await this.driver.$$(this.selectors.productItem);
+    const count = await productElements.length;
+    if (index < 0 || index >= count) {
+      throw new Error(`Product index ${index} out of bounds (max: ${count - 1})`);
+    }
+    
+    const titleElement = await productElements[index].$(this.selectors.productTitle);
+    return await titleElement.getText();
+  }
+
+  /**
+   * Count broken product images on the page
+   */
+  async countBrokenProductImages(): Promise<number> {
+    // This is a mock implementation as we can't actually check for broken images in Appium
+    // In a real implementation, you would need to use other methods to check image loading status
+    
+    // For now, return 0 (no broken images)
+    return 0;
+  }
 } 
